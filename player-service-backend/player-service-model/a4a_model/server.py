@@ -134,6 +134,7 @@ def team_feedback(body: TeamFeedbackInput) -> TeamFeedbackOutput:
     # Implement logic to process feedback for a team
     return TeamFeedbackOutput(
         seed_id=seed_id,
+        prediction_id=str(uuid.uuid4()),
         member_id=member_id,
         accepted=accepted
     )
@@ -171,4 +172,4 @@ def description_feedback(body: LLMFeedbackInput) -> LLMFeedbackOutput:
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0", debug=True, port=5001)

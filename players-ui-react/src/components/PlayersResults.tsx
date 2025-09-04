@@ -1,23 +1,29 @@
 import React, { useEffect, useState } from 'react';
 
-import {validateId, validateCountryCode, sanitizeInput} from "../utils";
-import useDatatFetcher from "../utils/DataFetcher";
-import fetchData from "../utils/DataFetcher";
+import { validateId, validateCountryCode } from '../utils/index';
+import { useListPlayersQuery } from '../utils/api.js';
+// import fetchData from '../utils/DataFetcher';
 
 function PlayerResults() {
 
-    const [players, setPlayers] = useState([]);
+    const [players, setPlayers] = useState<any[]>([]);
+    const { data: playersData, isLoading, isError } = useListPlayersQuery();
 
 
     useEffect(() => {
+        if (playersData) {
+            setPlayers(playersData.players.slice(0,10));
+        }
+    }, [playersData]);
+    // useEffect(() => {
 
-        fetchData()
-            .then(data => {
-                const subsetOfPlayers = data.players.slice(0,10);
-                setPlayers(subsetOfPlayers)
-                console.log(subsetOfPlayers)
-            })
-    }, []);
+    //     fetchData()
+    //         .then(data => {
+    //             const subsetOfPlayers = data.players.slice(0,10);
+    //             setPlayers(subsetOfPlayers)
+    //             console.log(subsetOfPlayers)
+    //         })
+    // }, []);
 
     const handleSearchById = (input) => {
 

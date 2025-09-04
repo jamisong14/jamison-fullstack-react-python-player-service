@@ -4,8 +4,10 @@ import sqlite3
 from sqlalchemy import create_engine
 from player_service import PlayerService
 import ollama
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, resources={r"/v1/*": {"origins": "http://localhost:3000"}})
 
 # Load CSV file in pandas dataframe and create SQLite database
 df = pd.read_csv('Player.csv')
