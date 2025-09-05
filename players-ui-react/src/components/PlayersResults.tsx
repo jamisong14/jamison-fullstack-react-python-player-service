@@ -13,6 +13,7 @@ function PlayerResults() {
     const [chatResponse, setChatResponse] = useState<string>('');
     const [chatLoading, setChatLoading] = useState<boolean>(false);
     const [socket, setSocket] = useState<WebSocket | null>(null);
+    const [buffer, setBuffer] = useState<string>('');
 
     const handleChat = () => {
         if (socket) {
@@ -23,21 +24,37 @@ function PlayerResults() {
     };
 
     useEffect(() => {
-        const socket = new WebSocket('ws://localhost:8765');
-        socket.onopen = () => {
-            setSocket(socket);
-        };
+        const socket = new WebSocket("ws://localhost:8765");
+        socket.onopen = () => setSocket(socket);
+      
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
             setChatLoading(false);
             if (!data.done) {
-                setChatResponse((prev) => prev + data.message.content);
+                setBuffer((prev) => prev + data.message.content); // 👈 type new chunk
             }
         };
-        return () => {
-            socket.close();
-        };
+      
+        return () => socket.close();
     }, []);
+
+    useEffect(() => {
+        if (!buffer) return;
+
+        const interval = setInterval(() => {
+            setBuffer((prevBuffer) => {
+                if (prevBuffer.length === 0) {
+                    clearInterval(interval);
+                    return prevBuffer;
+                }
+                const nextChar = prevBuffer[0];
+                setChatResponse((prev) => prev + nextChar);
+                return prevBuffer.slice(1);
+            });
+        }, 15); // ms per character
+
+        return () => clearInterval(interval);
+    }, [buffer]);
 
 
     useEffect(() => {
