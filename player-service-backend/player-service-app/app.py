@@ -5,6 +5,10 @@ from sqlalchemy import create_engine
 from player_service import PlayerService
 import ollama
 from flask_cors import CORS
+import asyncio
+import websockets
+import threading
+import json
 
 app = Flask(__name__)
 CORS(app, resources={r"/v1/*": {"origins": "http://localhost:3000"}})
@@ -46,5 +50,32 @@ def chat():
     ])
     return jsonify(response), 200
 
+# Create the websocket server
+async def websocket_server():
+    async with websockets.serve(websocket_handler, "localhost", 8765):
+        await asyncio.Future()
+
+# Handle incoming websocket messages
+async def websocket_handler(websocket, path):
+    async for message in websocket:
+        print(message)
+        response = ollama.chat(model='tinyllama', stream=True, messages=[
+            {
+                'role': 'user',
+                'content': message,
+            },
+        ])
+        for x in response:
+            await websocket.send(json.dumps(x))
+
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    # Start WebSocket server in a separate thread
+    def start_websocket_server():
+        asyncio.run(websocket_server())
+    
+    websocket_thread = threading.Thread(target=start_websocket_server, daemon=True)
+    websocket_thread.start()
+    
+    # Run Flask app in the main thread (required for signals to work)
+    app.run(host='0.0.0.0', port=8080, debug=True, use_reloader=False)

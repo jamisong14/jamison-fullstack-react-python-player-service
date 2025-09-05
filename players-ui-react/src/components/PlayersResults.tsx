@@ -9,6 +9,36 @@ function PlayerResults() {
     const [players, setPlayers] = useState<any[]>([]);
     const { data: playersData, isLoading, isError } = useListPlayersQuery();
 
+    const [chatMessage, setChatMessage] = useState<string>('');
+    const [chatResponse, setChatResponse] = useState<string>('');
+    const [chatLoading, setChatLoading] = useState<boolean>(false);
+    const [socket, setSocket] = useState<WebSocket | null>(null);
+
+    const handleChat = () => {
+        if (socket) {
+            socket.send(chatMessage);
+            setChatResponse('');
+            setChatLoading(true);
+        }
+    };
+
+    useEffect(() => {
+        const socket = new WebSocket('ws://localhost:8765');
+        socket.onopen = () => {
+            setSocket(socket);
+        };
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            setChatLoading(false);
+            if (!data.done) {
+                setChatResponse((prev) => prev + data.message.content);
+            }
+        };
+        return () => {
+            socket.close();
+        };
+    }, []);
+
 
     useEffect(() => {
         if (playersData) {
@@ -63,6 +93,13 @@ function PlayerResults() {
                      </div>
                  )
              })}
+         </div>
+
+         <div style={{ padding: '10px' }}>
+            <input type="text" value={chatMessage} onChange={(e) => setChatMessage(e.target.value)} style={{ width: '500px', marginBottom: '30px' }}/>
+            <button onClick={handleChat} disabled={chatLoading}>Submit</button>
+            {chatLoading && <div>Loading...</div>}
+            <div dangerouslySetInnerHTML={{__html: chatResponse.replaceAll('\n', '<br />')}}></div>
          </div>
 
 

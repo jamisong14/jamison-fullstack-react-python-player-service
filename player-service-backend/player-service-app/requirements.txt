@@ -5,3 +5,4 @@ SQLAlchemy==2.0.36
 ollama==0.3.3
 pytest==8.3.4
 flask_cors==5.0.0
+websockets==11.0.3
