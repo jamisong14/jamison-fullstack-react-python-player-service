@@ -45,12 +45,12 @@ function PlayerResults() {
              <div className="player-results-search">
                  <label>Player id:</label>
                  <input type=""/>
-                 <button onClick={handleSearchById}>Submit</button>
+                 <button id="submit-button-id" onClick={handleSearchById}>Submit</button>
              </div>
              <div className="player-results-search">
                  <label >Player Country Code:</label>
                  <input type=""/>
-                 <button onClick={()=>{}}>Submit</button>
+                 <button id="submit-button-country" onClick={()=>{}}>Submit</button>
              </div>
          </div>
          <div className="players-results-section">
